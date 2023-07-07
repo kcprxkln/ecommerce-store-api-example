@@ -1,7 +1,7 @@
 import requests
 from main import Customer, Item
 from pymongo import MongoClient 
-
+import pytest
 
 API_URL = 'http://127.0.0.1:8000'
 
@@ -16,15 +16,16 @@ customers_db = db['customers']
 
 
 item_obj_highest_id = items_db.find_one(sort=[("serial_id", -1)]) #returns object with the highest id
-item_highest_id = item_obj_highest_id['serial_id']                #fetches the serial id from that object
+
+if item_obj_highest_id:
+    item_highest_id = item_obj_highest_id['serial_id']
+
+else:
+    print('There are no documents in the \"items" database')
+    item_highest_id = 1 
 
 # customer_obj_highest_id = customers_db.find_one(sort=[("id", -1)]) 
 # customer_highest_id = customer_obj_highest_id['id']
-
-endpoints = {
-    "add_item" : API_URL + '/items/add',
-    "search_item" : API_URL + '/items/search'
-}
 
 test_item = Item(
     serial_id=item_highest_id + 1000, 
@@ -33,6 +34,14 @@ test_item = Item(
     stock=3200,
     added='12-08-2020'
 )
+
+
+endpoints = {
+    "add_item" : API_URL + '/items/add',
+    "search_item" : API_URL + '/items/search',
+    "delete_item" : API_URL + '/items/delete/' + str(test_item.dict()["serial_id"])
+}
+
 
 def test_add_new(item: Item = test_item, endpoint: str = endpoints['add_item']) -> None:
     response = requests.post(
@@ -50,6 +59,13 @@ def test_search(endpoint: str = endpoints['search_item']) -> None:
         url=endpoint, 
         params=params
     )
+    response.raise_for_status()
+
+    assert response.status_code == 200
+
+
+def test_delete(endpoint: str = endpoints['delete_item']) -> None:
+    response = requests.delete(url=endpoint)
     response.raise_for_status()
 
     assert response.status_code == 200

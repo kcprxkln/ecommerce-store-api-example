@@ -69,13 +69,14 @@ def query_by_params(
     return check_if_matches()
 
 
-@app.delete('/items/delete/{item_id}')
-def delete_item(item_id: str):
-    return {f"deleted": {item_id}}
+@app.delete('/items/delete/{serial_id}')
+def delete_item(serial_id: int):
+    items_db.delete_one({"serial_id": serial_id})
+    return {f"deleted": {serial_id}}
 
 
 @app.put('/items/update/{item_id}')
-def update_item(item_id: str):
+def update_item(item_id: int):
     return {f"updated": {item_id}}
 
 
