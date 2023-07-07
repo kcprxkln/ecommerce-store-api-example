@@ -36,14 +36,15 @@ test_item = Item(
 )
 
 
-endpoints = {
-    "add_item" : API_URL + '/items/add',
-    "search_item" : API_URL + '/items/search',
-    "delete_item" : API_URL + '/items/delete/' + str(test_item.dict()["serial_id"])
+item_endpoints = {
+    "add": API_URL + '/items/add',
+    "search": API_URL + '/items/search',
+    "delete": API_URL + '/items/delete/' + str(test_item.dict()["serial_id"]),
+    "update": API_URL + '/items/update/' + str(test_item.dict()["serial_id"])
 }
 
 
-def test_add_new(item: Item = test_item, endpoint: str = endpoints['add_item']) -> None:
+def test_add_new_item(item: Item = test_item, endpoint: str = item_endpoints['add']) -> None:
     response = requests.post(
         url=endpoint, 
         json=item.dict(),
@@ -53,7 +54,7 @@ def test_add_new(item: Item = test_item, endpoint: str = endpoints['add_item']) 
     assert response.status_code == 200
 
 
-def test_search(endpoint: str = endpoints['search_item']) -> None:
+def test_search_item(endpoint: str = item_endpoints['search']) -> None:
     params = test_item.dict()
     response = requests.get(
         url=endpoint, 
@@ -64,8 +65,19 @@ def test_search(endpoint: str = endpoints['search_item']) -> None:
     assert response.status_code == 200
 
 
-def test_delete(endpoint: str = endpoints['delete_item']) -> None:
+def test_delete_item(endpoint: str = item_endpoints['delete']) -> None:
     response = requests.delete(url=endpoint)
+    response.raise_for_status()
+
+    assert response.status_code == 200\
+    
+
+def test_update_item(item: Item = test_item, endpoint: str = item_endpoints['update']) -> None:
+    response = requests.put(
+        url=endpoint, 
+        json=item.dict(), 
+        headers={'Content-Type': 'application/json'}        
+    )
     response.raise_for_status()
 
     assert response.status_code == 200

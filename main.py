@@ -75,8 +75,10 @@ def delete_item(serial_id: int):
     return {f"deleted": {serial_id}}
 
 
-@app.put('/items/update/{item_id}')
-def update_item(item_id: int):
-    return {f"updated": {item_id}}
+@app.put('/items/update/{serial_id}')
+def update_item(serial_id: int, edited_item: Item):
+    update = {"$set": edited_item.dict()}
+    items_db.update_one({"serial_id": serial_id}, update)
+    return {f"updated": {serial_id}}    
 
 
