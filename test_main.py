@@ -36,9 +36,20 @@ test_item = Item(
 
 def test_add_new(item: Item = test_item, endpoint: str = endpoints['add_item']) -> None:
     response = requests.post(
-        url= endpoint, 
+        url=endpoint, 
         json=item.dict(),
         headers={'Content-Type':'application/json'})
     response.raise_for_status()
     
+    assert response.status_code == 200
+
+
+def test_search(endpoint: str = endpoints['search_item']) -> None:
+    params = test_item.dict()
+    response = requests.get(
+        url=endpoint, 
+        params=params
+    )
+    response.raise_for_status()
+
     assert response.status_code == 200

@@ -46,7 +46,7 @@ def query_by_params(
     name: str or None = None, 
     price: float or None = None, 
     stock: int or None = None, 
-    added: datetime or None = None
+    added: str or None = None
 ):
     def check_if_matches():
         query = {}
@@ -63,7 +63,7 @@ def query_by_params(
             query['added'] = added
 
         results = items_db.find(query)
-        items = [Item(**items) for item in results]
+        items = [Item(**item) for item in results]
         return items
 
     return check_if_matches()
