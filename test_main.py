@@ -1,7 +1,6 @@
 import requests
 from main import Customer, Item
 from pymongo import MongoClient 
-import pytest
 
 API_URL = 'http://127.0.0.1:8000'
 
@@ -35,12 +34,22 @@ test_item = Item(
     added='12-08-2020'
 )
 
+test_item_2 = Item(
+    serial_id=item_highest_id + 2000, 
+    name='White T-Shirt',
+    price=24.99,
+    stock=3200,
+    added='12-08-2020'
+)
+
+test_item_serial_id = str(test_item.dict()["serial_id"])
+
 
 item_endpoints = {
     "add": API_URL + '/items/add',
     "search": API_URL + '/items/search',
-    "delete": API_URL + '/items/delete/' + str(test_item.dict()["serial_id"]),
-    "update": API_URL + '/items/update/' + str(test_item.dict()["serial_id"])
+    "delete": API_URL + '/items/delete/' + test_item_serial_id,
+    "update": API_URL + '/items/update/' + test_item_serial_id
 }
 
 
@@ -65,19 +74,41 @@ def test_search_item(endpoint: str = item_endpoints['search']) -> None:
     assert response.status_code == 200
 
 
-def test_delete_item(endpoint: str = item_endpoints['delete']) -> None:
-    response = requests.delete(url=endpoint)
-    response.raise_for_status()
-
-    assert response.status_code == 200\
-    
-
-def test_update_item(item: Item = test_item, endpoint: str = item_endpoints['update']) -> None:
+def test_update_item(updated_item: Item = test_item_2, endpoint: str = item_endpoints['update']) -> None:
     response = requests.put(
         url=endpoint, 
-        json=item.dict(), 
+        json=updated_item.dict(), 
         headers={'Content-Type': 'application/json'}        
     )
     response.raise_for_status()
 
     assert response.status_code == 200
+
+
+def test_check_if_id_exists(item: Item = test_item, second_item: Item = test_item_2):
+    
+    #Create second item with another serial_id
+    requests.post(
+        url=item_endpoints['add'], 
+        json=item.dict(),
+        headers={'Content-Type':'application/json'}
+        )
+    
+    #Attempt to assign serial number of item to the second item that should raise 409 error
+    response = requests.put(
+        url=item_endpoints['update'],
+        json=second_item.dict(),
+        headers={'Content-Type': 'application/json'} 
+    )
+
+    assert response.status_code == 409
+    
+
+def test_delete_item(endpoint: str = item_endpoints['delete']) -> None:
+    response = requests.delete(url=endpoint)
+    response.raise_for_status()
+
+    assert response.status_code == 200
+    
+    ## Deleting second object that was created during the tests
+    requests.delete(url=API_URL + '/items/delete/' + str(test_item_2.dict()['serial_id']))

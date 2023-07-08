@@ -1,7 +1,6 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException, status
 from pymongo import MongoClient 
-from pydantic import BaseModel
-from datetime import datetime
+from models import Item, Customer
 
 
 client = MongoClient("mongodb://localhost:27017")
@@ -13,34 +12,20 @@ db = client[DB_NAME]
 items_db = db['items']
 customers_db = db['customers']
 
-class Customer(BaseModel):
-    id: int
-    first_name: str
-    last_name: str 
-    email: str
-    is_verified: bool
-
-class Item(BaseModel):
-    serial_id: int
-    name: str
-    price: float
-    stock: int
-    added: str
-
 
 app = FastAPI(
     title="FastAPI + mongoDB ecommerce store",
-    description="example of API for ecommerce shop created with FastAPI and mongoDB"
+    description="An example of API for ecommerce store created with FastAPI and mongoDB"
 )
 
 
-@app.post('/items/add')
+@app.post('/items/add', tags=["Items"])
 def add_new_item(item: Item):
     items_db.insert_one(item.dict())
     return {"item added with id": item.serial_id}
 
 
-@app.get('/items/search')
+@app.get('/items/search', tags=["Items"])
 def query_by_params(
     serial_id: int or None = None,
     name: str or None = None, 
@@ -69,16 +54,26 @@ def query_by_params(
     return check_if_matches()
 
 
-@app.delete('/items/delete/{serial_id}')
+@app.put('/items/update/{serial_id}', tags=["Items"])
+def update_item(serial_id: int, edited_item: Item):
+    
+    #Checking if the item with such ID already exists, since the ID needs to be Unique
+    new_serial_id = edited_item.dict()['serial_id']
+    
+    def check_if_id_exists(id: int = new_serial_id) -> bool:
+        current_id = items_db.find_one({"serial_id": id})
+        return current_id
+
+    if check_if_id_exists():
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Item with that serial_id already exists.")
+    
+    else:
+        update = {"$set": edited_item.dict()}
+        items_db.update_one({"serial_id": serial_id}, update)
+        return {f"updated": {serial_id}}    
+
+
+@app.delete('/items/delete/{serial_id}', tags=["Items"])
 def delete_item(serial_id: int):
     items_db.delete_one({"serial_id": serial_id})
     return {f"deleted": {serial_id}}
-
-
-@app.put('/items/update/{serial_id}')
-def update_item(serial_id: int, edited_item: Item):
-    update = {"$set": edited_item.dict()}
-    items_db.update_one({"serial_id": serial_id}, update)
-    return {f"updated": {serial_id}}    
-
-
