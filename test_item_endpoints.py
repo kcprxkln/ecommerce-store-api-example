@@ -1,6 +1,8 @@
 import requests
-from main import Customer, Item
+from main import Item
 from pymongo import MongoClient 
+
+### SPLIT TESTS FROM ITEM AND CUSTOMER FOR TWO INDEPENDENT FILES ###
 
 API_URL = 'http://127.0.0.1:8000'
 
@@ -11,7 +13,6 @@ DB_NAME = "store_db"
 db = client[DB_NAME]
 
 items_db = db['items']
-customers_db = db['customers']
 
 
 item_obj_highest_id = items_db.find_one(sort=[("serial_id", -1)]) #returns object with the highest id
@@ -23,8 +24,6 @@ else:
     print('There are no documents in the \"items" database')
     item_highest_id = 1 
 
-# customer_obj_highest_id = customers_db.find_one(sort=[("id", -1)]) 
-# customer_highest_id = customer_obj_highest_id['id']
 
 test_item = Item(
     serial_id=item_highest_id + 1000, 

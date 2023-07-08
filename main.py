@@ -19,6 +19,8 @@ app = FastAPI(
 )
 
 
+## ITEMS ENDPOINTS
+
 @app.post('/items/add', tags=["Items"])
 def add_new_item(item: Item):
     items_db.insert_one(item.dict())
@@ -77,3 +79,43 @@ def update_item(serial_id: int, edited_item: Item):
 def delete_item(serial_id: int):
     items_db.delete_one({"serial_id": serial_id})
     return {f"deleted": {serial_id}}
+
+
+## CUSTOMERS ENDPOINTS
+
+@app.post('/customers/add', tags=['Customers'])
+def add_customer(customer: Customer):
+    #check if email is really email (if contains exactly 1 x @ and @ isnt [0] or [-1] in the string)
+    #if it's not, raise an error
+    customers_db.insert_one(customer.dict())
+    return {"Added customer with id": customer.id}
+
+
+@app.get('/customers/search', tags=['Customers'])
+def search_customer(
+    id: int or None = None, 
+    first_name: str or None = None, 
+    last_name: str or None = None, 
+    email: str or None = None,
+    is_verified: bool or None = None
+):
+    def check_if_matches():
+        query = {}
+
+        if id is not None:
+            query['id'] = id
+        if first_name is not None:
+            query['first_name'] = first_name
+        if last_name is not None:
+            query['last_name'] = last_name
+        if email is not None:
+            query['email'] = email
+        if is_verified is not None:
+            query['is_verified'] = is_verified
+
+        results = items_db.find(query)
+        customers = [Customer(**customer) for customer in results]
+        return customers
+
+    return check_if_matches()
+    
