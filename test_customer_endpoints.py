@@ -14,7 +14,6 @@ db = client[DB_NAME]
 items_db = db['customers']
 
 
-
 customer_obj_highest_id = items_db.find_one(sort=[("id", -1)]) #returns object with the highest id
 
 if customer_obj_highest_id:

@@ -58,7 +58,7 @@ def query_by_params(
 
 @app.put('/items/update/{serial_id}', tags=["Items"])
 def update_item(serial_id: int, edited_item: Item):
-    
+
     #Checking if the item with such ID already exists, since the ID needs to be Unique
     new_serial_id = edited_item.dict()['serial_id']
     
@@ -158,7 +158,7 @@ def update_customer(id: int, edited_customer: Customer):
         return {f"updated": {id}}    
 
 
-@app.delete('/customers/delete/{id}', tags=['customers'])
+@app.delete('/customers/delete/{id}', tags=['Customers'])
 def delete_customer(id: int):
     customers_db.delete_one({"serial_id": id})
     return {f"deleted": {id}}
