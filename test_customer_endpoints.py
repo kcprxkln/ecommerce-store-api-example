@@ -33,11 +33,21 @@ test_customer = Customer(
     is_verified=True
 )
 
+test_customer_2 = Customer(
+    id=customer_highest_id + 100,
+    first_name="John", 
+    last_name="Doe",
+    email="john.@email.com",
+    is_verified=True
+)
+
 test_customer_id = str(test_customer.dict()['id'])
+test_customer_2_id = str(test_customer_2.dict()['id'])
 
 endpoints = {
     'add': API_URL + '/customers/add', 
-    'search': API_URL + '/customers/search/'
+    'search': API_URL + '/customers/search/',
+    'update': API_URL + '/customers/update/' + test_customer_id,
 }
 
 
@@ -79,3 +89,33 @@ def test_search_customer(customer: Customer = test_customer, endpoint: str = end
     )
 
     assert response.status_code == 200
+
+
+def test_update_customer(new_customer_data: Customer = test_customer_2, endpoint: str = endpoints['update']) -> None:
+
+    response = requests.put(
+        url=endpoint,
+        json=new_customer_data.dict(),
+        headers={'Content-Type':'application/json'}
+    )
+
+    assert response.status_code == 200
+
+
+def test_update_customer_existing_id(customer: Customer = test_customer_2) -> None:
+
+    requests.post(
+        url=endpoints['add'],
+        json=customer.dict(),
+        headers={"Content-Type": "application/json"}
+    )
+
+# test if it is possible to change the initial customer ID to the edited one
+    response = requests.put(
+        url=endpoints['update'], 
+        json=customer.dict(),
+        headers={'Content-Type':'application/json'}                     
+    )
+
+    assert response.status_code == 409
+

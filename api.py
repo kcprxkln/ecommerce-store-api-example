@@ -138,4 +138,24 @@ def search_customer(
         return customers
 
     return check_if_matches()
+
+@app.put('/customers/update/{id}')
+def update_customer(id: int, edited_customer: Customer):
+
+#Checking if the item with such ID already exists, since the ID needs to be Unique    
+    new_customer_id = edited_customer.dict()['id']
+    
+    def check_if_id_exists(id: int = new_customer_id) -> bool:
+        current_id = customers_db.find_one({"id": id})
+        return current_id
+
+    if check_if_id_exists():
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Customer with that ID already exists.")
+    
+    else:
+        update = {"$set": edited_customer.dict()}
+        items_db.update_one({"serial_id": id}, update)
+        return {f"updated": {id}}    
+
+
     
