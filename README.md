@@ -1,6 +1,6 @@
 # FastAPI + mongoDB e-commerce store scheme
 
-Api created with FastApi python framework that connects to the MongoDB databases, and gives preview of what e-commerce store API can look like.
+Api created with FastApi python framework that connects to the MongoDB database, and gives preview of what e-commerce store API can look like.
 
 There are two groups of endpoints, that have separate collections in the db: *Customers* and *Items*.
 
