@@ -21,7 +21,7 @@ if item_obj_highest_id:
     item_highest_id = item_obj_highest_id['serial_id']
 
 else:
-    print('There are no documents in the \"items" database')
+    print('There are no documents in the \"items" collection')
     item_highest_id = 1 
 
 
@@ -56,8 +56,8 @@ def test_add_new_item(item: Item = test_item, endpoint: str = item_endpoints['ad
     response = requests.post(
         url=endpoint, 
         json=item.dict(),
-        headers={'Content-Type':'application/json'})
-    response.raise_for_status()
+        headers={'Content-Type':'application/json'}
+        )
     
     assert response.status_code == 200
 
@@ -68,7 +68,6 @@ def test_search_item(endpoint: str = item_endpoints['search']) -> None:
         url=endpoint, 
         params=params
     )
-    response.raise_for_status()
 
     assert response.status_code == 200
 
@@ -79,12 +78,11 @@ def test_update_item(updated_item: Item = test_item_2, endpoint: str = item_endp
         json=updated_item.dict(), 
         headers={'Content-Type': 'application/json'}        
     )
-    response.raise_for_status()
 
     assert response.status_code == 200
 
 
-def test_check_if_id_exists(item: Item = test_item, second_item: Item = test_item_2):
+def test_check_if_id_exists(item: Item = test_item, second_item: Item = test_item_2) -> None:
     
     #Create second item with another serial_id
     requests.post(

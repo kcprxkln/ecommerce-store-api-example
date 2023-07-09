@@ -85,10 +85,30 @@ def delete_item(serial_id: int):
 
 @app.post('/customers/add', tags=['Customers'])
 def add_customer(customer: Customer):
-    #check if email is really email (if contains exactly 1 x @ and @ isnt [0] or [-1] in the string)
+    #check if email is really email (if contains exactly 1 x @ and @ isnt [0] or [-1] in the string) at least one "."
     #if it's not, raise an error
-    customers_db.insert_one(customer.dict())
-    return {"Added customer with id": customer.id}
+    def check_if_str_is_email(email: str = str(customer.dict()['email'])) -> bool:
+        
+        def count_occurrences(email: str = email, count_chars: list[str] = ['@', '.']):
+            occurrences = {char: email.count(char) for char in count_chars}
+            return occurrences 
+
+        if count_occurrences()['@'] == 1 and count_occurrences()['.'] >= 1:
+            
+            if email[0] == "@" or email[-1] == "@":
+                return False
+            else:
+                return True
+            
+        else: 
+            return False
+
+    if check_if_str_is_email():
+        customers_db.insert_one(customer.dict())
+        return {"Added customer with id": customer.id}
+    
+    else:
+        return HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='Invalid email format')
 
 
 @app.get('/customers/search', tags=['Customers'])
@@ -113,7 +133,7 @@ def search_customer(
         if is_verified is not None:
             query['is_verified'] = is_verified
 
-        results = items_db.find(query)
+        results = customers_db.find(query)
         customers = [Customer(**customer) for customer in results]
         return customers
 
