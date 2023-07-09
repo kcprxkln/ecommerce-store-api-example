@@ -48,6 +48,7 @@ endpoints = {
     'add': API_URL + '/customers/add', 
     'search': API_URL + '/customers/search/',
     'update': API_URL + '/customers/update/' + test_customer_id,
+    'delete': API_URL + '/customers/delete/' + test_customer_id
 }
 
 
@@ -110,7 +111,7 @@ def test_update_customer_existing_id(customer: Customer = test_customer_2) -> No
         headers={"Content-Type": "application/json"}
     )
 
-# test if it is possible to change the initial customer ID to the edited one
+# test if it is possible to change the initial customer ID to the existing one
     response = requests.put(
         url=endpoints['update'], 
         json=customer.dict(),
@@ -119,3 +120,10 @@ def test_update_customer_existing_id(customer: Customer = test_customer_2) -> No
 
     assert response.status_code == 409
 
+
+def test_delete_customer(endpoint: str = endpoints['delete']):
+    response = requests.delete(url=endpoint)
+
+    assert response.status_code == 200
+    # Delete object created during the tests:
+    requests.delete(url=API_URL + '/customers/delete/' + test_customer_2_id)

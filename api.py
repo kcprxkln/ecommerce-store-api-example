@@ -85,7 +85,7 @@ def delete_item(serial_id: int):
 
 @app.post('/customers/add', tags=['Customers'])
 def add_customer(customer: Customer):
-    #check if email is really email (if contains exactly 1 x @ and @ isnt [0] or [-1] in the string) at least one "."
+    #check if email is really email (if contains exactly 1 x @ and @ place isn't [0] or [-1], in the string must be at least one ".")
     #if it's not, raise an error
     def check_if_str_is_email(email: str = str(customer.dict()['email'])) -> bool:
         
@@ -139,10 +139,10 @@ def search_customer(
 
     return check_if_matches()
 
-@app.put('/customers/update/{id}')
+@app.put('/customers/update/{id}', tags=['Customers'])
 def update_customer(id: int, edited_customer: Customer):
 
-#Checking if the item with such ID already exists, since the ID needs to be Unique    
+#Checking if the Customer with such ID already exists, since the ID needs to be Unique    
     new_customer_id = edited_customer.dict()['id']
     
     def check_if_id_exists(id: int = new_customer_id) -> bool:
@@ -158,4 +158,7 @@ def update_customer(id: int, edited_customer: Customer):
         return {f"updated": {id}}    
 
 
-    
+@app.delete('/customers/delete/{id}', tags=['customers'])
+def delete_customer(id: int):
+    customers_db.delete_one({"serial_id": id})
+    return {f"deleted": {id}}
