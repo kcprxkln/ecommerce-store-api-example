@@ -1,5 +1,5 @@
 import requests
-from main import Item
+from api import Item
 from pymongo import MongoClient 
 
 ### SPLIT TESTS FROM ITEM AND CUSTOMER FOR TWO INDEPENDENT FILES ###

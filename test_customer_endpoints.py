@@ -1,5 +1,5 @@
 import requests
-from main import Customer
+from api import Customer
 from pymongo import MongoClient 
 
 
