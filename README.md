@@ -30,3 +30,4 @@ Tests are using classical CRUD scheme to make sure that after tests, there won't
 
 
 More details can be found after running the project locally, and then opening */docs* endpoint.
+Please note that this is only the example and can be further expanded.
