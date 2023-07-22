@@ -1,6 +1,9 @@
-from fastapi import FastAPI, HTTPException, status
+from fastapi import FastAPI, HTTPException, status, Response, Request
+from fastapi.exceptions import HTTPException
+from fastapi.responses import JSONResponse
 from pymongo import MongoClient 
 from models import Item, Customer
+from logger import APILogger
 
 
 client = MongoClient("mongodb://localhost:27017")
@@ -12,15 +15,25 @@ db = client[DB_NAME]
 items_db = db['items']
 customers_db = db['customers']
 
+logger = APILogger('api_requests.log')
 
 app = FastAPI(
     title="FastAPI + mongoDB ecommerce store",
     description="An example of API for ecommerce store created with FastAPI and mongoDB"
 )
 
+# LOGGER HANDLING 
+@app.middleware("http")
+async def log_status_code(request: Request, call_next):
+    response: Response = await call_next(request)
+    logger.log_request(
+        method=request.method, 
+        status_code=response.status_code,
+        endpoint=request.url.path)
+    return response
+
 
 ## ITEMS ENDPOINTS
-
 @app.post('/items/add', tags=["Items"])
 def add_new_item(item: Item):
     items_db.insert_one(item.dict())
@@ -108,7 +121,7 @@ def add_customer(customer: Customer):
         return {"Added customer with id": customer.id}
     
     else:
-        return HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='Invalid email format')
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='Invalid email format')
 
 
 @app.get('/customers/search', tags=['Customers'])
@@ -138,6 +151,7 @@ def search_customer(
         return customers
 
     return check_if_matches()
+
 
 @app.put('/customers/update/{id}', tags=['Customers'])
 def update_customer(id: int, edited_customer: Customer):
