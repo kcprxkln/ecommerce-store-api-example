@@ -7,6 +7,8 @@ There are two groups of endpoints, that have separate collections in the db: *Cu
 Additionally, there is the test for every single endpoint in order to make sure everything works correctly.
 Tests are using classical CRUD scheme to make sure that after tests, there won't be any unexpected data.
 
+All of the Api requests are saved to the api_requests.log file that has dedicated apiLogFileCleaner.sh script that can trim api_requests file to the wanted amount of records.
+
 ### Possible methods
 **Items related:**
 
